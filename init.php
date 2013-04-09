@@ -46,10 +46,8 @@ class Af_Feedmod extends Plugin implements IHandler
 
     function hook_article_filter($article)
     {
-        global $pluginhost;
-        $json_conf = $pluginhost->get($this, 'json_conf');
+        $json_conf = $this->host->get($this, 'json_conf');
         $owner_uid = $article['owner_uid'];
-
         $data = json_decode($json_conf, true);
 
         foreach ($data as $urlpart=>$config) {
