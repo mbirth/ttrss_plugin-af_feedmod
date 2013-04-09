@@ -1,7 +1,7 @@
 <?php
 
-class Af_Feedmod extends Plugin {
-
+class Af_Feedmod extends Plugin implements IHandler
+{
     private $link;
     private $host;
 
@@ -20,54 +20,88 @@ class Af_Feedmod extends Plugin {
         $this->link = $host->get_link();
         $this->host = $host;
 
+        $host->add_hook($host::HOOK_PREFS_TABS, $this);
+# only allowed for system plugins:        $host->add_handler('pref-feedmod', '*', $this);
         $host->add_hook($host::HOOK_ARTICLE_FILTER, $this);
-        $host->add_hook($host::HOOK_PREFS_TAB, $this);
+    }
+
+    function csrf_ignore($method)
+    {
+        $csrf_ignored = array("index", "edit");
+        return array_search($method, $csrf_ignored) !== false;
+    }
+
+    function before($method)
+    {
+        if ($_SESSION["uid"]) {
+            return true;
+        }
+        return false;
+    }
+
+    function after()
+    {
+        return true;
     }
 
     function hook_article_filter($article)
     {
-        $sometext = $this->host->get($this, "sometext");
-        
+        global $pluginhost;
+        $json_conf = $pluginhost->get($this, 'json_conf');
         $owner_uid = $article['owner_uid'];
 
-        if (strpos($article['link'], 'heise.de') !== FALSE) {   // only process heise.de articles
-            if (strpos($article['plugin_data'], "feedmod,$owner_uid:") === FALSE) {   // do not process an article more than once
-                $doc = new DOMDocument();
-                @$doc->loadHTML(fetch_file_contents($article['link']));
+        $data = json_decode($json_conf, true);
 
-                $basenode = false;
-
-                if ($doc) {
-                    $xpath = new DOMXPath($doc);
-                    $entries = $xpath->query('(//div.meldung_wrapper)');   // find main DIV
-
-                    $matches = array();
-                    foreach ($entries as $entry) {
-                        $basenode = $entry;
-                        break;
-                    }
-
-                    if ($basenode) {
-                        $article['content'] = $doc->saveXML($basenode);
-                        $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
-                    }
-                }
-            } else if (isset($article['stored']['content'])) {
-                $article['content'] = $article['stored']['content'];
+        foreach ($data as $urlpart=>$config) {
+            if (strpos($article['link'], $urlpart) === false) continue;   // skip this config if URL not matching
+            if (strpos($article['plugin_data'], "feedmod,$owner_uid:") !== false) {
+                // do not process an article more than once
+                if (isset($article['stored']['content'])) $article['content'] = $article['stored']['content'];
+                break;
             }
+
+            switch ($config['type']) {
+                case 'xpath':
+                    $doc = new DOMDocument();
+                    @$doc->loadHTML(fetch_file_contents($article['link']));
+
+                    if ($doc) {
+                        $basenode = false;
+                        $xpath = new DOMXPath($doc);
+                        $entries = $xpath->query('(//'.$config['xpath'].')');   // find main DIV according to config
+
+                        if ($entries->length > 0) $basenode = $entries->item(0);
+
+                        if ($basenode) {
+                            $article['content'] = $doc->saveXML($basenode);
+                            $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
+                        }
+                    }
+                    break;
+
+                default:
+                    // unknown type or invalid config
+                    continue;
+            }
+
+            break;   // if we got here, we found the correct entry in $data, do not process more
         }
+
         return $article;
     }
 
-    function hook_prefs_tab($args)
+    function hook_prefs_tabs($args)
     {
-        if ($args != "prefPrefs") return;
+        print '<div id="instanceConfigTab" dojoType="dijit.layout.ContentPane"
+            href="backend.php?op=af_feedmod"
+            title="' . __('FeedMod') . '"></div>';
+    }
 
-        print "<div dojoType=\"dijit.layout.AccordionPane\" title=\"".__("FeedMod Plugin")."\">";
-
-        print "<br/>";
-
-        $sometext = $this->host->get($this, "sometext");
+    function index()
+    {
+        global $pluginhost;
+        $sometext = $pluginhost->get($this, "sometext");
+        $json_conf = $pluginhost->get($this, 'json_conf');
 
         print "<form dojoType=\"dijit.form.Form\">";
 
@@ -77,41 +111,44 @@ class Af_Feedmod extends Plugin {
                 new Ajax.Request('backend.php', {
                     parameters: dojo.objectToQuery(this.getValues()),
                     onComplete: function(transport) {
-                        notify_info(transport.responseText);
+                        if (transport.responseText.indexOf('error')>=0) notify_error(transport.responseText);
+                            else notify_info(transport.responseText);
                     }
                 });
                 //this.reset();
             }
             </script>";
-            
-            print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"pluginhandler\">";
-            print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"save\">";
-            print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"plugin\" value=\"feedmod\">";
 
-            print "<table width=\"100%\" class=\"prefPrefsList\">";
+        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"pluginhandler\">";
+        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"save\">";
+        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"plugin\" value=\"af_feedmod\">";
 
-            print "<tr><td width=\"40%\">".__("Some text")."</td>";
-            print "<td class=\"prefValue\"><input dojoType=\"dijit.form.ValidationTextBox\" required=\"1\" name=\"sometext\" value=\"$sometext\"></td></tr>";
+        print "<table width=\"100%\" class=\"prefPrefsList\">";
 
-            print "</table>";
+        print "<tr><td width=\"40%\">".__("Some text")."</td>";
+        print "<td class=\"prefValue\"><input dojoType=\"dijit.form.ValidationTextBox\" required=\"1\" name=\"sometext\" value=\"$sometext\"></td></tr>";
 
-            print "<p><button dojoType=\"dijit.form.Button\" type=\"submit\">".
-                __("Save")."</button>";
+        print "</table>";
 
-            print "</form>";
+        print "<table width='100%'><tr><td>";
+        print "<textarea dojoType=\"dijit.form.SimpleTextarea\" name=\"json_conf\" style=\"font-size: 12px; width: 99%; height: 500px;\">$json_conf</textarea>";
+        print "</td></tr></table>";
 
-            print "</div>"; #pane
+        print "<p><button dojoType=\"dijit.form.Button\" type=\"submit\">".__("Save")."</button>";
+
+        print "</form>";
     }
-            
+
     function save()
     {
-        $sometext = explode(",", db_escape_string($this->link, $_POST["sometext"]));
-        $sometext = array_map("trim", $sometext);
-        $sometext = array_map("mb_strtolower", $sometext);
-        $sometext = join(", ", $sometext);
+        $json_conf = $_POST['json_conf'];
 
-        $this->host->set($this, "sometext", $sometext);
+        if (is_null(json_decode($json_conf))) {
+            echo __("error: Invalid JSON!");
+            return false;
+        }
 
+        $this->host->set($this, 'json_conf', $json_conf);
         echo __("Configuration saved.");
     }
 
