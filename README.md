@@ -51,3 +51,6 @@ The *array key* is part of the URL of the article links(!). You'll notice the `g
 The **type** has to be `xpath` for now. Maybe there will be more types in the future.
 
 The **xpath** value is the actual Xpath-element to fetch from the linked page.
+
+
+If you get an error about "Invalid JSON!", you can use [JSONLint](http://jsonlint.com/) to locate the erroneous part.

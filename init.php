@@ -98,7 +98,6 @@ class Af_Feedmod extends Plugin implements IHandler
     function index()
     {
         global $pluginhost;
-        $sometext = $pluginhost->get($this, "sometext");
         $json_conf = $pluginhost->get($this, 'json_conf');
 
         print "<form dojoType=\"dijit.form.Form\">";
@@ -120,13 +119,6 @@ class Af_Feedmod extends Plugin implements IHandler
         print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"pluginhandler\">";
         print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"save\">";
         print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"plugin\" value=\"af_feedmod\">";
-
-        print "<table width=\"100%\" class=\"prefPrefsList\">";
-
-        print "<tr><td width=\"40%\">".__("Some text")."</td>";
-        print "<td class=\"prefValue\"><input dojoType=\"dijit.form.ValidationTextBox\" required=\"1\" name=\"sometext\" value=\"$sometext\"></td></tr>";
-
-        print "</table>";
 
         print "<table width='100%'><tr><td>";
         print "<textarea dojoType=\"dijit.form.SimpleTextarea\" name=\"json_conf\" style=\"font-size: 12px; width: 99%; height: 500px;\">$json_conf</textarea>";
