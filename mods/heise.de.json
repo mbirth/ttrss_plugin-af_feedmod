@@ -1,0 +1,10 @@
+{
+    "name": "heise.de",
+    "feed": "http://www.heise.de/newsticker/heise-atom.xml",
+    "match": "heise.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='meldung_wrapper']",
+        "force_charset": "utf-8"
+    }
+}

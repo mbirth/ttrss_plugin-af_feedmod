@@ -1,0 +1,9 @@
+{
+    "name": "Jojo's illustrierter Blog",
+    "feed": "http://blog.beetlebum.de/feed/",
+    "match": "blog.beetlebum.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='entry-content']"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "name": "The Oatmeal",
+    "feed": "http://theoatmeal.com/feed/rss",
+    "match": "oatmeal",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='comic']"
+    }
+}
