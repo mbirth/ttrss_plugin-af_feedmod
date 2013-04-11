@@ -2,11 +2,11 @@
 
 $config = array(
     'type' => 'xpath',
-    'xpath' => 'div[@class="bacontent"]',
+    'xpath' => 'div[@itemprop="articleBody"]',
 );
 
 $article = array(
-    'link' => 'http://www.berlin.de/polizei/presse-fahndung/archiv/383117/index.html',
+    'link' => 'http://www.der-postillon.com/2013/04/nordkoreas-armee-nach-wochenlangem.html',
     'content' => 'This is the feed content',
     'plugin_data' => '',
 );

@@ -4,6 +4,6 @@
     "match": "n24.de",
     "config": {
         "type": "xpath",
-        "xpath": "div[@class='news']"
+        "xpath": "div[@class='c2a']"
     }
 }

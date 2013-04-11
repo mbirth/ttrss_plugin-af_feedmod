@@ -1,0 +1,9 @@
+{
+    "name": "Polizei Havelland",
+    "feed": "http://www.internetwache.brandenburg.de/sixcms/list.php?page=rss_hvl",
+    "match": "internetwache.brandenburg.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='content']/div[@class='box_content']"
+    }
+}

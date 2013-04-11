@@ -1,0 +1,9 @@
+{
+    "name": "Der Postillon",
+    "feed": "http://www.der-postillon.com/feeds/posts/default",
+    "match": "blogspot/rkEL",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@itemprop='articleBody']"
+    }
+}

@@ -66,3 +66,54 @@ The **xpath** value is the actual Xpath-element to fetch from the linked page. O
 
 
 If you get an error about "Invalid JSON!", you can use [JSONLint](http://jsonlint.com/) to locate the erroneous part.
+
+
+XPath
+-----
+
+### Tools
+
+To test your XPath expressions, you can use these Chrome extensions:
+
+* [XPath Helper](https://chrome.google.com/webstore/detail/xpath-helper/hgimnogjllphhhkhlmebbmlgjoejdpjl)
+* [xPath Viewer](https://chrome.google.com/webstore/detail/xpath-viewer/oemacabgcknpcikelclomjajcdpbilpf)
+* [xpathOnClick](https://chrome.google.com/webstore/detail/xpathonclick/ikbfbhbdjpjnalaooidkdbgjknhghhbo)
+
+
+### Examples
+
+Some XPath expressions you could need (the `//` is automatically prepended and must be omitted in the FeedMod configuration):
+
+##### HTML5 <article> tag
+
+```html
+<article>…article…</article>
+```
+
+```xslt
+//article
+```
+
+##### DIV inside DIV
+
+```html
+<div id="content"><div class="box_content">…article…</div></div>`
+```
+
+```xslt
+//div[@id='content']/div[@class='box_content']
+```
+
+##### Multiple classes
+
+```html
+<div class="post-body entry-content xh-highlight">…article…</div>
+```
+
+```xslt
+//div[starts-with(@class ,'post-body')]
+```
+or
+```xslt
+//div[contains(@class, 'entry-content')]
+```

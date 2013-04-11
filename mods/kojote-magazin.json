@@ -1,0 +1,9 @@
+{
+    "name": "Der Kojote",
+    "feed": "http://www.kojote-magazin.de/feed/rss2",
+    "match": "kojote-magazin.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='post']"
+    }
+}
