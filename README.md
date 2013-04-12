@@ -84,7 +84,7 @@ To test your XPath expressions, you can use these Chrome extensions:
 
 Some XPath expressions you could need (the `//` is automatically prepended and must be omitted in the FeedMod configuration):
 
-##### HTML5 <article> tag
+##### HTML5 &lt;article&gt; tag
 
 ```html
 <article>…article…</article>

@@ -52,6 +52,11 @@ class Af_Feedmod extends Plugin implements IHandler
         $owner_uid = $article['owner_uid'];
         $data = json_decode($json_conf, true);
 
+        if (!is_array($data)) {
+            // no valid JSON or no configuration at all
+            return $article;
+        }
+
         foreach ($data as $urlpart=>$config) {
             if (strpos($article['link'], $urlpart) === false) continue;   // skip this config if URL not matching
             if (strpos($article['plugin_data'], "feedmod,$owner_uid:") !== false) {
