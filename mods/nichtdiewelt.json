@@ -1,0 +1,9 @@
+{
+    "name": "NichtDieWelt",
+    "feed": "http://nicht-die-welt.de/feed/rss/",
+    "match": "NichtDieWelt",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='content-area']"
+    }
+}
