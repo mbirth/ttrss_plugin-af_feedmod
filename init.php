@@ -2,7 +2,6 @@
 
 class Af_Feedmod extends Plugin implements IHandler
 {
-    private $link;
     private $host;
 
     function about()
@@ -17,7 +16,6 @@ class Af_Feedmod extends Plugin implements IHandler
 
     function init($host)
     {
-        $this->link = $host->get_link();
         $this->host = $host;
 
         $host->add_hook($host::HOOK_PREFS_TABS, $this);
