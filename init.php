@@ -7,11 +7,16 @@ class Af_Feedmod extends Plugin implements IHandler
     function about()
     {
         return array(
-            0.9,   // version
+            1.0,   // version
             'Replace feed contents by contents from the linked page',   // description
             'mbirth',   // author
             false,   // is_system
         );
+    }
+
+    function api_version()
+    {
+        return 2;
     }
 
     function init($host)
