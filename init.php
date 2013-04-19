@@ -141,7 +141,7 @@ class Af_Feedmod extends Plugin implements IHandler
 
     function index()
     {
-        global $pluginhost;
+        $pluginhost = PluginHost::getInstance();
         $json_conf = $pluginhost->get($this, 'json_conf');
 
         print "<form dojoType=\"dijit.form.Form\">";
