@@ -1,0 +1,11 @@
+{
+    "name": "Spiegel einestages",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.spiegel.de/einestages/index.rss",
+    "match": "einestages\.spiegel\.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='huNewAlbum']"
+    }
+}

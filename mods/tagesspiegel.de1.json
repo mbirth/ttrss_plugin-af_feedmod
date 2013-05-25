@@ -1,0 +1,11 @@
+{
+    "name": "Tagesspiegel 1",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.tagesspiegel.de/contentexport/feed/home",
+    "match": "tagesspiegel0Bde0C",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='hcf-main-col hcf-detail']"
+    }
+}

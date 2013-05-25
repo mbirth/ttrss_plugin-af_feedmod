@@ -1,0 +1,11 @@
+{
+    "name": "Golem 2",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://rss.golem.de/rss.php?feed=RSS2.0",
+    "match": "golem0Bde0C",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='g g4 g-ie6']"
+    }
+}

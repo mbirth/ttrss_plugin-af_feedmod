@@ -1,0 +1,12 @@
+{
+    "name": "Chip.de Top News",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.chip.de/rss/rss_topnews.xml",
+    "match": "chip\.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='col478-le']"
+//        "xpath": "div[starts-with(@class, 'col478-le']"
+    }
+}

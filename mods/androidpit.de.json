@@ -1,0 +1,11 @@
+{
+    "name": "AndroidPIT",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.androidpit.de/feed/main.xml",
+    "match": "androidpit\.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='left']"
+    }
+}

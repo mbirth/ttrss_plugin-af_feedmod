@@ -1,0 +1,11 @@
+{
+    "name": "Spiegel Online",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.spiegel.de/schlagzeilen/index.rss",
+    "match": "www\.spiegel\.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='spArticleColumn']"
+    }
+}

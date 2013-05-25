@@ -1,0 +1,11 @@
+{
+    "name": "teltarif.de",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.teltarif.de/feed/news/20.rss2",
+    "match": "teltarif\.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='roman4']"
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "Zeit.de",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://newsfeed.zeit.de/all",
+    "match": "zeit\.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='article']"
+    }
+}

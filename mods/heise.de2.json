@@ -1,0 +1,11 @@
+{
+    "name": "heise.de 2",
+    "author": "Andreas Steinhoff",
+    "stamp": 1369484764,
+    "feed": "http://www.heise.de/newsticker/heise-atom.xml",
+    "match": "heise\.de/tr",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='artikel']"
+    }
+}
