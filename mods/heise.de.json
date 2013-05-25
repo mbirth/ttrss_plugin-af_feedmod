@@ -1,5 +1,7 @@
 {
     "name": "heise.de",
+    "author": "Markus Birth",
+    "stamp": 1369500284,
     "feed": "http://www.heise.de/newsticker/heise-atom.xml",
     "match": "heise.de",
     "config": {

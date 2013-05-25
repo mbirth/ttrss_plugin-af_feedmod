@@ -1,5 +1,7 @@
 {
     "name": "NichtDieWelt",
+    "author": "Markus Birth",
+    "stamp": 1369500284,
     "feed": "http://nicht-die-welt.de/feed/rss/",
     "match": "NichtDieWelt",
     "config": {

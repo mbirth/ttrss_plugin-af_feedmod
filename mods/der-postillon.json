@@ -1,5 +1,7 @@
 {
     "name": "Der Postillon",
+    "author": "Markus Birth",
+    "stamp": 1369500284,
     "feed": "http://www.der-postillon.com/feeds/posts/default",
     "match": "blogspot/rkEL",
     "config": {

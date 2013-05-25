@@ -1,5 +1,7 @@
 {
     "name": "Polizei Berlin",
+    "author": "Markus Birth",
+    "stamp": 1369500284,
     "feed": "http://www.berlin.de/polizei/presse-fahndung/_rss_presse.xml",
     "match": "berlin.de/polizei",
     "config": {

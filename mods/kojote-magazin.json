@@ -1,5 +1,7 @@
 {
     "name": "Der Kojote",
+    "author": "Markus Birth",
+    "stamp": 1369500284,
     "feed": "http://www.kojote-magazin.de/feed/rss2",
     "match": "kojote-magazin.de",
     "config": {
