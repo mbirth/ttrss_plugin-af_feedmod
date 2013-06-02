@@ -71,13 +71,14 @@ class Af_Feedmod extends Plugin implements IHandler
             switch ($config['type']) {
                 case 'xpath':
                     $doc = new DOMDocument();
+                    $link = trim($article['link']);
 
                     if (version_compare(VERSION, '1.7.9', '>=')) {
-                        $html = fetch_file_contents($article['link']);
+                        $html = fetch_file_contents($link);
                         $content_type = $fetch_last_content_type;
                     } else {
                         // fallback to file_get_contents()
-                        $html = file_get_contents($article['link']);
+                        $html = file_get_contents($link);
 
                         // try to fetch charset from HTTP headers
                         $headers = $http_response_header;
