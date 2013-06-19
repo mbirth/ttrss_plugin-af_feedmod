@@ -1,0 +1,12 @@
+{
+    "name": "news.ORF.at",
+    "author": "Roland Angerer",
+    "stamp": 1371640419,
+    "feed": "http://rss.orf.at/news.xml",
+    "match": "news.orf.at",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[contains(@class, 'storyText')]",
+        "cleanup": [ "h1", "div[contains(@class, 'storyMeta')]" ]
+    }
+}
