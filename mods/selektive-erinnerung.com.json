@@ -1,0 +1,12 @@
+{
+    "name": "Selektive Erinnerung",
+    "author": "Roland Angerer",
+    "stamp": 1371642811,
+    "feed": "http://www.selektive-erinnerung.com/rss",
+    "match": "selektive-erinnerung.com",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='post']",
+        "cleanup": [ "div[@id='postinfo']" ]
+    }
+}
