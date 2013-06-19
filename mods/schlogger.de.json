@@ -1,0 +1,12 @@
+{
+    "name": "schlogger",
+    "author": "Roland Angerer",
+    "stamp": 1371642811,
+    "feed": "http://schlogger.de/wordpress/feed/",
+    "match": "schlogger.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[contains(@class, 'entry-content')]",
+        "cleanup": [ "iframe", "div[contains(@class, 'sharedaddy')]" ]
+    }
+}
