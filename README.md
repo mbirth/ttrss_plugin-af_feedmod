@@ -50,7 +50,8 @@ A configuration looks like this:
 },
 "blog.beetlebum.de": {
     "type": "xpath",
-    "xpath": "div[@class='entry-content']"
+    "xpath": "div[@class='entry-content']",
+    "cleanup": [ "header", "footer" ],
 }
 
 }
@@ -61,6 +62,8 @@ The *array key* is part of the URL of the article links(!). You'll notice the `g
 **type** has to be `xpath` for now. Maybe there will be more types in the future.
 
 The **xpath** value is the actual Xpath-element to fetch from the linked page. Omit the leading `//` - they will get prepended automatically.
+
+If **type** was set to `xpath' there is an additional option **cleanup** available. Its an array of Xpath-elements (relative to the fetched node) to remove from the fetched node. Omit the leading `//` - they will get prepended automatically.
 
 **force_charset** allows to override automatic charset detection. If it is omitted, the charset will be parsed from the HTTP headers or loadHTML() will decide on its own.
 
