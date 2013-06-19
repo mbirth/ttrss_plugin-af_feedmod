@@ -1,11 +1,12 @@
 {
     "name": "Jojo's illustrierter Blog",
     "author": "Markus Birth",
-    "stamp": 1369500284,
+    "stamp": 1371635271,
     "feed": "http://blog.beetlebum.de/feed/",
     "match": "blog.beetlebum.de",
     "config": {
         "type": "xpath",
-        "xpath": "div[@class='entry-content']"
+        "xpath": "div[@id='content']/article",
+        "cleanup": [ "header", "footer" ]
     }
 }

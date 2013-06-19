@@ -1,11 +1,12 @@
 {
     "name": "The Oatmeal",
     "author": "Markus Birth",
-    "stamp": 1369500284,
+    "stamp": 1371635271,
     "feed": "http://theoatmeal.com/feed/rss",
     "match": "oatmeal",
     "config": {
         "type": "xpath",
-        "xpath": "div[@id='comic']"
+        "xpath": "div[@id='comic']",
+        "cleanup": [ "div[@id='content_footer2']" ]
     }
 }
