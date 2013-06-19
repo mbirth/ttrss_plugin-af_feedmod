@@ -1,0 +1,11 @@
+{
+    "name": "Peanuts",
+    "author": "Roland Angerer",
+    "stamp": 1371650174,
+    "feed": "http://feeds.feedburner.com/uclick/peanuts?format=xml",
+    "match": "gocomics.com/peanuts",
+    "config": {
+        "type": "xpath",
+        "xpath": "p[contains(@class, 'feature_item')]"
+    }
+}
