@@ -1,0 +1,11 @@
+{
+    "name": "Zombies and Fairytales",
+    "author": "Roland Angerer",
+    "stamp": 1371644173,
+    "feed": "http://166612.webhosting66.1blu.de/zaf_de/wordpress/feed/",
+    "match": "zaf_de/wordpress/comic",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='comic']"
+    }
+}
