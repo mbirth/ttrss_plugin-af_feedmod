@@ -1,0 +1,12 @@
+{
+    "name": "Ctrl+Alt+Del",
+    "author": "Roland Angerer",
+    "stamp": 1371647734,
+    "feed": "http://cdn.cad-comic.com/rss.xml",
+    "match": "cad-comic.com/cad",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='content']",
+        "cleanup": [ "div[@id='menu']", "div[contains(@class, 'navigation')]", "div[contains(@class, 'addthis_toolbar')]" ]
+    }
+}
