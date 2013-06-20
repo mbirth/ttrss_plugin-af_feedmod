@@ -1,0 +1,11 @@
+{
+    "name": "Fall on Me",
+    "author": "Roland Angerer",
+    "stamp": 1371642100,
+    "feed": "http://www.littleteacup.net/fallonme/feed/",
+    "match": "littleteacup.net/fallonme",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='comic']"
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "Paralleluniversum",
+    "author": "Roland Angerer",
+    "stamp": 1371642493,
+    "feed": "http://www.paralleluniversum.net/feed/",
+    "match": "paralleluniversum.net",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='comic']"
+    }
+}

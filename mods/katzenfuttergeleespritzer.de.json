@@ -1,0 +1,11 @@
+{
+    "name": "Katzenfuttergeleespritzer.de",
+    "author": "Roland Angerer",
+    "stamp": 1371643613,
+    "feed": "http://www.katzenfuttergeleespritzer.de/feed/",
+    "match": "katzenfuttergeleespritzer.de/comics",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='comic']"
+    }
+}
