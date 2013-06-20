@@ -116,6 +116,15 @@ class Af_Feedmod extends Plugin implements IHandler
                         if ($entries->length > 0) $basenode = $entries->item(0);
 
                         if ($basenode) {
+                            // remove nodes from cleanup configuration
+                            if (isset($config['cleanup'])) {
+                                foreach ($config['cleanup'] as $cleanup) {
+                                    $nodelist = $xpath->query('//'.$cleanup, $basenode);
+                                    foreach ($nodelist as $node) {
+                                        $node->parentNode->removeChild($node);
+                                    }
+                                }
+                            }
                             $article['content'] = $doc->saveXML($basenode);
                             $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
                         }
