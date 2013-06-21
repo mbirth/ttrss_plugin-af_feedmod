@@ -118,7 +118,7 @@ class Af_Feedmod extends Plugin implements IHandler
                         if ($basenode) {
                             // remove nodes from cleanup configuration
                             if (isset($config['cleanup'])) {
-                                if (!is_array($config['cleanup']) {
+                                if (!is_array($config['cleanup'])) {
                                     $config['cleanup'] = array($config['cleanup']);
                                 }
                                 foreach ($config['cleanup'] as $cleanup) {
