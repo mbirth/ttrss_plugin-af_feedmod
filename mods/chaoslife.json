@@ -1,0 +1,11 @@
+{
+    "name": "ChaosLife",
+    "author": "Roland Angerer",
+    "stamp": 1371815572,
+    "feed": "http://chaoslife.findchaos.com/feed",
+    "match": "chaoslife.findchaos.com",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@id='comic']"
+    }
+}
