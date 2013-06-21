@@ -121,7 +121,12 @@ class Af_Feedmod extends Plugin implements IHandler
                                 foreach ($config['cleanup'] as $cleanup) {
                                     $nodelist = $xpath->query('//'.$cleanup, $basenode);
                                     foreach ($nodelist as $node) {
-                                        $node->parentNode->removeChild($node);
+                                        if ($node instanceof DOMAttr) {
+                                            $node->ownerElement->removeAttributeNode($node);
+                                        }
+                                        else {
+                                            $node->parentNode->removeChild($node);
+                                        }
                                     }
                                 }
                             }
