@@ -152,7 +152,7 @@ class Af_Feedmod extends Plugin implements IHandler
 
     function hook_prefs_tabs($args)
     {
-        print '<div id="instanceConfigTab" dojoType="dijit.layout.ContentPane"
+        print '<div id="feedmodConfigTab" dojoType="dijit.layout.ContentPane"
             href="backend.php?op=af_feedmod"
             title="' . __('FeedMod') . '"></div>';
     }
