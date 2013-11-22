@@ -90,21 +90,30 @@ class Af_Feedmod extends Plugin implements IHandler
                             }
                         }
                     }
-
+                    
+                    $charset = false;
                     if (!isset($config['force_charset'])) {
-                        $charset = false;
                         if ($content_type) {
                             preg_match('/charset=(\S+)/', $content_type, $matches);
                             if (isset($matches[1]) && !empty($matches[1])) $charset = $matches[1];
                         }
-
-                        if ($charset) {
-                            $html = '<?xml encoding="' . $charset . '">' . $html;
-                        }
                     } else {
                         // use forced charset
-                        $html = '<?xml encoding="' . $config['force_charset'] . '">' . $html;
+                        $charset = $config['force_charset'];
                     }
+    
+                    if ($charset && isset($config['force_unicode']) && $config['force_unicode']) {
+                        $html = iconv($charset, 'utf-8', $html);
+                        $charset = 'utf-8';
+                    }
+                    
+                    if ($charset) {
+                            $html = '<?xml encoding="' . $charset . '">' . $html;
+                    }
+                    
+                    
+                        
+                    
 
                     @$doc->loadHTML($html);
 
