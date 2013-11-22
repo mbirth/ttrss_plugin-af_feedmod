@@ -1,0 +1,11 @@
+{
+    "name": "Dilbert",
+    "author": "Roland Angerer",
+    "stamp": 1376903915,
+    "feed": "http://feeds.feedburner.com/DilbertDailyStrip",
+    "match": "DilbertDailyStrip",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[contains(@class, 'STR_Image')]"
+    }
+}
