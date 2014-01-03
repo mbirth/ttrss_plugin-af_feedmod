@@ -1,0 +1,6 @@
+{
+  "habrahabr.ru":{
+    "type": "xpath",
+    "xpath": "div[@class='content html_format']"
+  }
+}
