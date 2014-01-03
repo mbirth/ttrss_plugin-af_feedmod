@@ -1,0 +1,6 @@
+{
+  "rutracker.org":{
+    "type": "xpath",
+    "xpath": "td[@class='message td2']"
+  }
+}
