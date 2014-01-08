@@ -1,0 +1,6 @@
+{
+"news.hitb.org":{
+"type": "xpath",
+"xpath": "div[@class='field-items']"
+}
+}
