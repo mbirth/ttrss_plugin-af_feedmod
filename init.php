@@ -72,7 +72,9 @@ class Af_Feedmod extends Plugin implements IHandler
                 case 'xpath':
                     $doc = new DOMDocument();
                     $link = trim($article['link']);
-
+					if(is_array($config['reformat'])){
+						$link = $this->reformat_url($link, $config['reformat']);
+					}
                     if (version_compare(VERSION, '1.7.9', '>=')) {
                         $html = fetch_file_contents($link);
                         $content_type = $fetch_last_content_type;
@@ -90,7 +92,6 @@ class Af_Feedmod extends Plugin implements IHandler
                             }
                         }
                     }
-                    
                     $charset = false;
                     if (!isset($config['force_charset'])) {
                         if ($content_type) {
@@ -158,6 +159,20 @@ class Af_Feedmod extends Plugin implements IHandler
 
         return $article;
     }
+	
+	function reformat_url($url, $options){
+		foreach($options as $option){
+			switch($option['type']){
+				case 'replace':
+					$url = str_replace($option['search'], $option['replace'], $url);
+				break;
+				case 'regex':
+					$url = preg_replace($option['pattern'], $option['replace'], $url);
+				break;
+			}
+		}
+		return $url;
+	}
 
     function hook_prefs_tabs($args)
     {
