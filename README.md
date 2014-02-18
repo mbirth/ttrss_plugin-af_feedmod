@@ -43,6 +43,28 @@ A configuration looks like this:
 "golem0Bde0C": {
     "type": "xpath",
     "xpath": "article"
+    "reformat": [
+        {
+            "type": "regex",
+            "pattern": "/(?:[a-z0-9A-Z\\/.\\:]*?)golem0Bde0C(.*)0Erss0Bhtml\\/story01.htm/",
+            "replace": "http://www.golem.de/$1.html"
+        },
+        {
+            "type": "replace",
+            "search": [
+                "0A",
+                "0C",
+                "0B",
+                "0E"
+            ],
+            "replace": [
+                "0",
+                "/",
+                ".",
+                "-"
+            ]
+        }
+    ]
 },
 "oatmeal": {
     "type": "xpath",
@@ -67,6 +89,7 @@ If **type** was set to `xpath` there is an additional option **cleanup** availab
 
 **force_charset** allows to override automatic charset detection. If it is omitted, the charset will be parsed from the HTTP headers or loadHTML() will decide on its own.
 
+**reformat** is an array of formating rules for the url of the full article. The rules are pplied before the full article is fetched. There are two possible types: **regex** and **replace**. **regex** takes a regex in an option called **pattern** and the replacement in **replace**. For details see [preg_replace](http://www.php.net/manual/de/function.preg-replace.php) in the PHP documentation. **replace** uses the PHP function str_replace, which takes either a string or an array as search and replace value.
 
 If you get an error about "Invalid JSON!", you can use [JSONLint](http://jsonlint.com/) to locate the erroneous part.
 
