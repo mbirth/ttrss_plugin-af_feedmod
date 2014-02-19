@@ -75,17 +75,17 @@ The *array key* is part of the URL of the article links(!). You'll notice the `g
 
 **type** has to be `xpath` or `split`.
 
-##xpath
+### xpath
 The **xpath** value is the actual Xpath-element to fetch from the linked page. Omit the leading `//` - they will get prepended automatically.
 
 There is an additional option **cleanup** available. Its an array of Xpath-elements (relative to the fetched node) to remove from the fetched node. Omit the leading `//` - they will get prepended automatically.
 
-##split
+### split
 The **steps** value is an array of actions performed in the given order. If **after** is given the content will be split using the value and the second half is used, if **before** the first half is used. preg_split is used for this action.
 
 There is an additional option **cleanup** available. Its an array of regex that are removed using preg_replace.
 
-##General options
+### General options
 **force_charset** allows to override automatic charset detection. If it is omitted, the charset will be parsed from the HTTP headers or loadHTML() will decide on its own.
 
 
