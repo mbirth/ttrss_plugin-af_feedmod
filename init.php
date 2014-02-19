@@ -152,7 +152,6 @@ class Af_Feedmod extends Plugin implements IHandler
                         $xpath = new DOMXPath($doc);
                         $entries = $xpath->query('(//'.$config['xpath'].')');   // find main DIV according to config
 
-                          Logger::get()->log('Entries found => '.$entries->length);
                         if ($entries->length > 0) $basenode = $entries->item(0);
 
                         if ($basenode) {
