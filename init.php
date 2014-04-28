@@ -123,9 +123,10 @@ class Af_Feedmod extends Plugin implements IHandler
                     }
                     if(strlen($html) == 0)
                         break;
-                    
-                    foreach($config['cleanup'] as $cleanup){
-                        $html = preg_replace($cleanup, '', $html);
+                    if(isset($config['cleanup'])){
+                       foreach($config['cleanup'] as $cleanup){
+                           $html = preg_replace($cleanup, '', $html);
+                       }
                     }
                      
                     $article['content'] = $html;
