@@ -1,0 +1,11 @@
+{
+    "name": "VISIONS.de",
+    "author": "boxdot",
+    "feed": "http://rss.feedsportal.com/c/32350/f/443184/index.rss",
+    "match": "visions0Bde0C",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[contains(@class, 'marginbt')]",
+        "force_charset": "utf-8"
+    }
+}
