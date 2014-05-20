@@ -5,6 +5,6 @@
     "match": "ej.ru",
     "config": {
         "type": "xpath",
-        "xpath": "div[@class='txt_e']"
+        "xpath": "div[@class='text' or @class='txt_e']"
     }
 }

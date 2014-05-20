@@ -1,6 +1,6 @@
 <?php
 
-require_once('../fetch.php');
+require_once(dirname(__FILE__)  . '/../fetch.php');
 
 if (count($argv) <= 2) {
     echo 'USAGE: php fetch.php [mod_file] [article_url]' . PHP_EOL;
@@ -33,5 +33,6 @@ $config = $data['config'];
 //
 
 $owner_uid = 100;
-$article = array( 'link' => $article_url, 'plugin_data' => '' );
-echo fetch_article($article, $config)['content'];
+$article = array( 'link' => $article_url );
+
+echo fetch_article($article, $config);
