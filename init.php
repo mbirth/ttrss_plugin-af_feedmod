@@ -70,7 +70,7 @@ class Af_Feedmod extends Plugin implements IHandler
             
             $link = trim($article['link']);
             if(is_array($config['reformat'])){
-                $link = $this->reformat_url($link, $config['reformat']);
+                $link = $this->reformat($link, $config['reformat']);
             }
             
             
@@ -123,9 +123,10 @@ class Af_Feedmod extends Plugin implements IHandler
                     }
                     if(strlen($html) == 0)
                         break;
-                    
-                    foreach($config['cleanup'] as $cleanup){
-                        $html = preg_replace($cleanup, '', $html);
+                    if(isset($config['cleanup'])){
+                       foreach($config['cleanup'] as $cleanup){
+                           $html = preg_replace($cleanup, '', $html);
+                       }
                     }
                      
                     $article['content'] = $html;
@@ -182,25 +183,28 @@ class Af_Feedmod extends Plugin implements IHandler
                     // unknown type or invalid config
                     continue;
             }
-
+			
             break;   // if we got here, we found the correct entry in $data, do not process more
+        }
+        if(is_array($config['modify'])){
+            $article['content'] = $this->reformat($article['content'], $config['modify']);
         }
 
         return $article;
     }
     
-    function reformat_url($url, $options){
+    function reformat($string, $options){
         foreach($options as $option){
             switch($option['type']){
                 case 'replace':
-                    $url = str_replace($option['search'], $option['replace'], $url);
+                    $string = str_replace($option['search'], $option['replace'], $string);
                 break;
                 case 'regex':
-                    $url = preg_replace($option['pattern'], $option['replace'], $url);
+                    $string = preg_replace($option['pattern'], $option['replace'], $string);
                 break;
             }
         }
-        return $url;
+        return $string;
     }
 
     function hook_prefs_tabs($args)
