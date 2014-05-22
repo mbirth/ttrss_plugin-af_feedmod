@@ -74,6 +74,20 @@ A configuration looks like this:
     "type": "xpath",
     "xpath": "div[@class='entry-content']",
     "cleanup": [ "header", "footer" ],
+},
+"www.spiegel.de": {
+    "type": "split",
+    "steps": [
+        {
+            "after": "/article-section clearfix\"\\W*>/",
+            "before": "/<div\\W*class=\"module-box home-link-box/"
+        },
+        {
+            "before": "/<div\\W*class=\"btwBarInArticles/"
+        }
+    ],
+    "cleanup" : [ "~<script([^<]|<(?!/script))*</script>~msi" ],
+    "force_unicode": true
 }
 
 }
@@ -81,12 +95,19 @@ A configuration looks like this:
 
 The *array key* is part of the URL of the article links(!). You'll notice the `golem0Bde0C` in the last entry: That's because all their articles link to something like `http://rss.feedsportal.com/c/33374/f/578068/p/1/s/3f6db44e/l/0L0Sgolem0Bde0Cnews0Cthis0Eis0Ean0Eexample0A10Erss0Bhtml/story01.htm` and to have the plugin match that URL and not interfere with other feeds using *feedsportal.com*, I used the part `golem0Bde0C`.
 
-**type** has to be `xpath` for now. Maybe there will be more types in the future.
+**type** has to be `xpath` or `split`.
 
+### xpath
 The **xpath** value is the actual Xpath-element to fetch from the linked page. Omit the leading `//` - they will get prepended automatically.
 
-If **type** was set to `xpath` there is an additional option **cleanup** available. Its an array of Xpath-elements (relative to the fetched node) to remove from the fetched node. Omit the leading `//` - they will get prepended automatically.
+There is an additional option **cleanup** available. Its an array of Xpath-elements (relative to the fetched node) to remove from the fetched node. Omit the leading `//` - they will get prepended automatically.
 
+### split
+The **steps** value is an array of actions performed in the given order. If **after** is given the content will be split using the value and the second half is used, if **before** the first half is used. preg_split is used for this action.
+
+There is an additional option **cleanup** available. Its an array of regex that are removed using preg_replace.
+
+### General options
 **force_charset** allows to override automatic charset detection. If it is omitted, the charset will be parsed from the HTTP headers or loadHTML() will decide on its own.
 
 **reformat** is an array of formating rules for the url of the full article. The rules are pplied before the full article is fetched. There are two possible types: **regex** and **replace**. **regex** takes a regex in an option called **pattern** and the replacement in **replace**. For details see [preg_replace](http://www.php.net/manual/de/function.preg-replace.php) in the PHP documentation. **replace** uses the PHP function str_replace, which takes either a string or an array as search and replace value.

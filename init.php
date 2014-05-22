@@ -52,56 +52,90 @@ class Af_Feedmod extends Plugin implements IHandler
         global $fetch_last_content_type;
 
         $json_conf = $this->host->get($this, 'json_conf');
-        $owner_uid = $article['owner_uid'];
         $data = json_decode($json_conf, true);
-
+        
         if (!is_array($data)) {
             // no valid JSON or no configuration at all
             return $article;
         }
 
         foreach ($data as $urlpart=>$config) {
+              $articleMarker = "feedmod,".$article['owner_uid'].",".md5($urlpart.print_r($config, true)).":";
             if (strpos($article['link'], $urlpart) === false) continue;   // skip this config if URL not matching
-            if (strpos($article['plugin_data'], "feedmod,$owner_uid:") !== false) {
+            if (false && strpos($article['plugin_data'], $articleMarker) !== false) {
                 // do not process an article more than once
                 if (isset($article['stored']['content'])) $article['content'] = $article['stored']['content'];
                 break;
             }
+            
+            $link = trim($article['link']);
+            if(is_array($config['reformat'])){
+                $link = $this->reformat($link, $config['reformat']);
+            }
+            
+            
 
+            if (version_compare(VERSION, '1.7.9', '>=')) {
+                $html = fetch_file_contents($link);
+                $content_type = $fetch_last_content_type;
+            } else {
+                // fallback to file_get_contents()
+                $html = file_get_contents($link);
+
+                // try to fetch charset from HTTP headers
+                $headers = $http_response_header;
+                $content_type = false;
+                foreach ($headers as $h) {
+                    if (substr(strtolower($h), 0, 13) == 'content-type:') {
+                        $content_type = substr($h, 14);
+                        // don't break here to find LATEST (if redirected) entry
+                    }
+                }
+            }
+            
+            $charset = false;
+            if (!isset($config['force_charset'])) {
+                if ($content_type) {
+                    preg_match('/charset=(\S+)/', $content_type, $matches);
+                    if (isset($matches[1]) && !empty($matches[1])) $charset = $matches[1];
+                }
+            } else {
+                // use forced charset
+                $charset = $config['force_charset'];
+            }
+            
+            if ($charset && isset($config['force_unicode']) && $config['force_unicode']) {
+                $html = iconv($charset, 'utf-8', $html);
+                $charset = 'utf-8';
+            }
+            
             switch ($config['type']) {
+                case 'split':
+                    foreach($config['steps'] as $step){
+                          if(isset($step['after'])){
+                            $result = preg_split ($step['after'], $html);
+                              $html = $result[1];
+                        }
+                        if(isset($step['before'])){
+                            $result = preg_split ($step['before'], $html);
+                              $html = $result[0];
+                        }
+                    }
+                    if(strlen($html) == 0)
+                        break;
+                    if(isset($config['cleanup'])){
+                       foreach($config['cleanup'] as $cleanup){
+                           $html = preg_replace($cleanup, '', $html);
+                       }
+                    }
+                     
+                    $article['content'] = $html;
+                    $article['plugin_data'] = $articleMarker . $article['plugin_data'];                        
+                        
+                break;
+                
                 case 'xpath':
                     $doc = new DOMDocument();
-                    $link = trim($article['link']);
-					if(is_array($config['reformat'])){
-						$link = $this->reformat_url($link, $config['reformat']);
-					}
-                    if (version_compare(VERSION, '1.7.9', '>=')) {
-                        $html = fetch_file_contents($link);
-                        $content_type = $fetch_last_content_type;
-                    } else {
-                        // fallback to file_get_contents()
-                        $html = file_get_contents($link);
-
-                        // try to fetch charset from HTTP headers
-                        $headers = $http_response_header;
-                        $content_type = false;
-                        foreach ($headers as $h) {
-                            if (substr(strtolower($h), 0, 13) == 'content-type:') {
-                                $content_type = substr($h, 14);
-                                // don't break here to find LATEST (if redirected) entry
-                            }
-                        }
-                    }
-                    $charset = false;
-                    if (!isset($config['force_charset'])) {
-                        if ($content_type) {
-                            preg_match('/charset=(\S+)/', $content_type, $matches);
-                            if (isset($matches[1]) && !empty($matches[1])) $charset = $matches[1];
-                        }
-                    } else {
-                        // use forced charset
-                        $charset = $config['force_charset'];
-                    }
     
                     if ($charset && isset($config['force_unicode']) && $config['force_unicode']) {
                         $html = iconv($charset, 'utf-8', $html);
@@ -112,10 +146,6 @@ class Af_Feedmod extends Plugin implements IHandler
                             $html = '<?xml encoding="' . $charset . '">' . $html;
                     }
                     
-                    
-                        
-                    
-
                     @$doc->loadHTML($html);
 
                     if ($doc) {
@@ -144,7 +174,7 @@ class Af_Feedmod extends Plugin implements IHandler
                                 }
                             }
                             $article['content'] = $doc->saveXML($basenode);
-                            $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
+                            $article['plugin_data'] = $articleMarker . $article['plugin_data'];
                         }
                     }
                     break;
@@ -153,26 +183,29 @@ class Af_Feedmod extends Plugin implements IHandler
                     // unknown type or invalid config
                     continue;
             }
-
+			
             break;   // if we got here, we found the correct entry in $data, do not process more
+        }
+        if(is_array($config['modify'])){
+            $article['content'] = $this->reformat($article['content'], $config['modify']);
         }
 
         return $article;
     }
-	
-	function reformat_url($url, $options){
-		foreach($options as $option){
-			switch($option['type']){
-				case 'replace':
-					$url = str_replace($option['search'], $option['replace'], $url);
-				break;
-				case 'regex':
-					$url = preg_replace($option['pattern'], $option['replace'], $url);
-				break;
-			}
-		}
-		return $url;
-	}
+    
+    function reformat($string, $options){
+        foreach($options as $option){
+            switch($option['type']){
+                case 'replace':
+                    $string = str_replace($option['search'], $option['replace'], $string);
+                break;
+                case 'regex':
+                    $string = preg_replace($option['pattern'], $option['replace'], $string);
+                break;
+            }
+        }
+        return $string;
+    }
 
     function hook_prefs_tabs($args)
     {
