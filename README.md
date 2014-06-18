@@ -111,7 +111,9 @@ There is an additional option **cleanup** available. Its an array of regex that 
 ### General options
 **force_charset** allows to override automatic charset detection. If it is omitted, the charset will be parsed from the HTTP headers or loadHTML() will decide on its own.
 
-**reformat** is an array of formating rules for the url of the full article. The rules are pplied before the full article is fetched. There are two possible types: **regex** and **replace**. **regex** takes a regex in an option called **pattern** and the replacement in **replace**. For details see [preg_replace](http://www.php.net/manual/de/function.preg-replace.php) in the PHP documentation. **replace** uses the PHP function str_replace, which takes either a string or an array as search and replace value.
+**reformat** is an array of formating rules for the **url** of the full article. The rules are applied before the full article is fetched. There are two possible types: **regex** and **replace**. **regex** takes a regex in an option called **pattern** and the replacement in **replace**. For details see [preg_replace](http://www.php.net/manual/de/function.preg-replace.php) in the PHP documentation. **replace** uses the PHP function str_replace, which takes either a string or an array as search and replace value.
+
+**modify** is the same as described above but for the content. It is applied after the split/xpath selection.
 
 If you get an error about "Invalid JSON!", you can use [JSONLint](http://jsonlint.com/) to locate the erroneous part.
 
