@@ -10,7 +10,7 @@ class Af_Feedmod extends Plugin implements IHandler
         return array(
             1.0,   // version
             'Replace feed contents by contents from the linked page',   // description
-            'mbirth',   // author
+            'mbirth/m42e',   // author
             false,   // is_system
         );
     }
@@ -61,7 +61,7 @@ class Af_Feedmod extends Plugin implements IHandler
             if (false && strpos($article['plugin_data'], $articleMarker) !== false) {
                 // do not process an article more than once
                 if (isset($article['stored']['content'])) $article['content'] = $article['stored']['content'];
-                break;
+                return $article;
             }
             
             $link = trim($article['link']);
@@ -71,8 +71,6 @@ class Af_Feedmod extends Plugin implements IHandler
                      
             $article['content'] = $this->getNewContent($link, $config);
             $article['plugin_data'] = $articleMarker . $article['plugin_data'];                        
-			
-            break;   // if we got here, we found the correct entry in $data, do not process more
         }
 
         return $article;
