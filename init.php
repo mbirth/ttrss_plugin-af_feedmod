@@ -4,6 +4,7 @@ class Af_Feedmod extends Plugin implements IHandler
 {
     private $host;
     private $debug;
+    private $charset;
 
     function about()
     {
@@ -54,32 +55,21 @@ class Af_Feedmod extends Plugin implements IHandler
 
     function hook_article_filter($article)
     {
-        global $fetch_last_content_type;
-
         if (($config = $this->getConfigSection($article['link'])) !== FALSE){
-            $articleMarker = "feedmod,".$article['owner_uid'].",".md5($urlpart.print_r($config, true)).":";
-            if (false && strpos($article['plugin_data'], $articleMarker) !== false) {
+            $articleMarker = "feedmod,".$article['owner_uid'].",".md5(print_r($config, true)).":";
+            if (strpos($article['plugin_data'], $articleMarker) !== false) {
                 // do not process an article more than once
                 if (isset($article['stored']['content'])) $article['content'] = $article['stored']['content'];
                 return $article;
             }
             
-            $link = trim($article['link']);
-            if(is_array($config['reformat'])){
-                $link = $this->reformat($link, $config['reformat']);
-            }
+            $link = $this->reformatUrl($article['link'], $config);
                      
             $article['content'] = $this->getNewContent($link, $config);
             $article['plugin_data'] = $articleMarker . $article['plugin_data'];                        
         }
 
         return $article;
-    }
-
-    function getConfig(){
-       $json_conf = $this->host->get($this, 'json_conf');
-       $data = json_decode($json_conf, true);
-       return $data;
     }
 
     function getConfigSection($url){
@@ -91,6 +81,21 @@ class Af_Feedmod extends Plugin implements IHandler
            }
         }
         return FALSE;
+    }
+
+    function getConfig(){
+       $json_conf = $this->host->get($this, 'json_conf');
+       $data = json_decode($json_conf, true);
+       $this->debug = isset($data['debug']) && $data['debug'];
+       return $data;
+    }
+
+    function reformatUrl($url, $config){
+       $link = trim($url);
+       if(is_array($config['reformat'])){
+          $link = $this->reformat($link, $config['reformat']);
+       }
+       return $link;
     }
     
     function reformat($string, $options){
@@ -114,6 +119,7 @@ class Af_Feedmod extends Plugin implements IHandler
 
     }
     function getArticleContent($link, $config){
+        global $fetch_last_content_type;
        if (version_compare(VERSION, '1.7.9', '>=')) {
           $html = fetch_file_contents($link);
           $content_type = $fetch_last_content_type;
@@ -132,26 +138,44 @@ class Af_Feedmod extends Plugin implements IHandler
           }
        }
 
-       $charset = false;
+       $this->charset = false;
        if (!isset($config['force_charset'])) {
           if ($content_type) {
              preg_match('/charset=(\S+)/', $content_type, $matches);
-             if (isset($matches[1]) && !empty($matches[1])) $charset = $matches[1];
+             if (isset($matches[1]) && !empty($matches[1])) $this->charset = $matches[1];
           }
        } else {
           // use forced charset
-          $charset = $config['force_charset'];
+          $this->charset = $config['force_charset'];
        }
 
-       if ($charset && isset($config['force_unicode']) && $config['force_unicode']) {
-          $html = iconv($charset, 'utf-8', $html);
-          $charset = 'utf-8';
+       if ($this->charset && isset($config['force_unicode']) && $config['force_unicode']) {
+          $html = iconv($this->charset, 'utf-8', $html);
+          $this->charset = 'utf-8';
        }
        return $html;
     }
     function processArticle($html, $config){
        switch ($config['type']) {
        case 'split':
+          $html = $this->performSplit($html, $config);
+          break;
+
+       case 'xpath':
+          $html = $this->performXpath($html, $config);
+          break;
+
+       default:
+          continue;
+       }
+       if(is_array($config['modify'])){
+          $html = $this->reformat($html, $config['modify']);
+       }
+       return $html;
+    }
+
+    function performSplit($html, $config){
+         $orig_html = $html;
           foreach($config['steps'] as $step){
              if(isset($step['after'])){
                 $result = preg_split ($step['after'], $html);
@@ -163,66 +187,70 @@ class Af_Feedmod extends Plugin implements IHandler
              }
           }
           if(strlen($html) == 0)
-             break;
+             return $orig_html;
           if(isset($config['cleanup'])){
              foreach($config['cleanup'] as $cleanup){
                 $html = preg_replace($cleanup, '', $html);
              }
           }
-          break;
+          return $html;
+    }
 
-       case 'xpath':
-          $doc = new DOMDocument();
+    function performXpath($html, $config){
+       $doc = new DOMDocument();
 
-          if ($charset && isset($config['force_unicode']) && $config['force_unicode']) {
-             $html = iconv($charset, 'utf-8', $html);
-             $charset = 'utf-8';
-          }
-
-          if ($charset) {
-             $html = '<?xml encoding="' . $charset . '">' . $html;
-          }
-
-          @$doc->loadHTML($html);
-
-          if ($doc) {
-             $basenode = false;
-             $xpath = new DOMXPath($doc);
-             $entries = $xpath->query('(//'.$config['xpath'].')');   // find main DIV according to config
-
-             if ($entries->length > 0) $basenode = $entries->item(0);
-
-             if ($basenode) {
-                // remove nodes from cleanup configuration
-                if (isset($config['cleanup'])) {
-                   if (!is_array($config['cleanup'])) {
-                      $config['cleanup'] = array($config['cleanup']);
-                   }
-                   foreach ($config['cleanup'] as $cleanup) {
-                      $nodelist = $xpath->query('//'.$cleanup, $basenode);
-                      foreach ($nodelist as $node) {
-                         if ($node instanceof DOMAttr) {
-                            $node->ownerElement->removeAttributeNode($node);
-                         }
-                         else {
-                            $node->parentNode->removeChild($node);
-                         }
-                      }
-                   }
-                }
-                $html = $doc->saveXML($basenode);
-             }
-          }
-          break;
-
-       default:
-          // unknown type or invalid config
-          continue;
+       if ($this->charset) {
+          $html = '<?xml encoding="' . $this->charset . '">' . $html;
        }
-       if(is_array($config['modify'])){
-          $html = $this->reformat($html, $config['modify']);
+
+       @$doc->loadHTML($html);
+
+       if ($doc) {
+          $basenode = false;
+          $xpath = new DOMXPath($doc);
+          $entries = $xpath->query('(//'.$config['xpath'].')');   // find main DIV according to config
+
+          if ($entries->length > 0) $basenode = $entries->item(0);
+
+          if (!$basenode) return $html;
+
+          // remove nodes from cleanup configuration
+          $basenode = $this->cleanupNode($xpath, $basenode, $config);
+          $html = $doc->saveXML($basenode);
        }
        return $html;
+    }
+
+    function cleanupNode($xpath, $basenode, $config){
+       if(($cconfig = $this->getCleanupConfig($config))!== FALSE){
+          foreach ($cconfig as $cleanup) {
+             if(strpos($cleanup, "./") !== 0){
+                $cleanup = '//'.$cleanup;
+             }
+             $nodelist = $xpath->query($cleanup, $basenode);
+             foreach ($nodelist as $node) {
+                if ($node instanceof DOMAttr) {
+                   $node->ownerElement->removeAttributeNode($node);
+                }
+                else {
+                   $node->parentNode->removeChild($node);
+                }
+             }
+          }
+       }
+       return $basenode;
+    }
+
+    function getCleanupConfig($config){
+       $cconfig = false;
+       
+       if (isset($config['cleanup'])) {
+          $cconfig = $config['cleanup'];
+          if (!is_array($cconfig)) {
+             $cconfig = array($cconfig);
+          }
+       }
+       return $cconfig;
     }
 
     function hook_prefs_tabs($args)
@@ -268,13 +296,13 @@ class Af_Feedmod extends Plugin implements IHandler
 
         print "<script type=\"dojo/method\" event=\"onSubmit\" args=\"evt\">
             evt.preventDefault();
+            dojo.query('#test_result').attr('innerHTML', '');
             new Ajax.Request('backend.php', {
                 parameters: dojo.objectToQuery(this.getValues()),
                 onComplete: function(transport) {
                     if (transport.responseText.indexOf('error')>=0 && transport.responseText.indexOf('error') <= 10) notify_error(transport.responseText);
-                    else {
+                    else
                        dojo.query('#test_result').attr('innerHTML', transport.responseText);
-    }
                 }
             });
             </script>";
@@ -307,6 +335,7 @@ class Af_Feedmod extends Plugin implements IHandler
     function test(){
        $test_url = $_POST['test_url'];
        $config = $this->getConfigSection($test_url);
+       $test_url = $this->reformatUrl($test_url, $config);
        if($config === FALSE) 
           echo "error: URL did not match";
        else
