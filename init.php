@@ -3,6 +3,7 @@
 class Af_Feedmod extends Plugin implements IHandler
 {
     private $host;
+    private $debug;
 
     function about()
     {
@@ -47,15 +48,13 @@ class Af_Feedmod extends Plugin implements IHandler
         return true;
     }
 
+    private function _log($msg) {
+       if ($this->debug) trigger_error($msg, E_USER_WARNING);
+    } 
+
     function hook_article_filter($article)
     {
         global $fetch_last_content_type;
-
-
-        if (!is_array($data)) {
-            // no valid JSON or no configuration at all
-            return $article;
-        }
 
         if (($config = $this->getConfigSection($article['link'])) !== FALSE){
             $articleMarker = "feedmod,".$article['owner_uid'].",".md5($urlpart.print_r($config, true)).":";
@@ -87,9 +86,11 @@ class Af_Feedmod extends Plugin implements IHandler
 
     function getConfigSection($url){
         $data = $this->getConfig(); 
-        foreach ($data as $urlpart=>$config) {
-            if (strpos($url, $urlpart) === false) continue;   // skip this config if URL not matching
-            return $config;
+        if(is_array($data)){
+           foreach ($data as $urlpart=>$config) {
+              if (strpos($url, $urlpart) === false) continue;   // skip this config if URL not matching
+              return $config;
+           }
         }
         return FALSE;
     }
