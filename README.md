@@ -21,6 +21,7 @@ Configuration
 -------------
 
 The configuration is done in JSON format. In the preferences, you'll find a new tab called *FeedMod*. Use the large field to enter/modify the configuration data and click the **Save** button to store it.
+You can enter an URL in the field below and click **Test** to get a preview what the result will be if the filter is applied to the url.
 
 A configuration looks like this:
 
