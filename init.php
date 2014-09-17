@@ -149,7 +149,7 @@ class Af_Feedmod extends Plugin implements IHandler
                             foreach (["href", "src"] as $attrname) {
                                 $attrs = $xpath->query('(//@'.$attrname.')', $basenode);
                                 foreach ($attrs as $attr) {
-                                    if (strpos($attr->nodeValue, ":") !== false || $attr->nodeValue[0] == "#" || strpos($attr->nodeValue, "//") == 0) continue;
+                                    if (strpos($attr->nodeValue, ":") !== false || $attr->nodeValue[0] == "#" || strpos($attr->nodeValue, "//") === 0) continue;
                                     if ($attr->nodeValue[0] == "/") $attr->nodeValue = $hostrelurl . $attr->nodeValue;
                                     else $attr->nodeValue = $filerelurl . $attr->nodeValue;
                                 }
