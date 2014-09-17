@@ -142,6 +142,19 @@ class Af_Feedmod extends Plugin implements IHandler
                                     }
                                 }
                             }
+
+                            $filerelurl = substr($link, 0, strrpos($link, "/", strpos($link, "//") + 2));
+                            $hostrelurl = substr($link, 0, strpos($link, "/", strpos($link, "//") + 2));
+                            $xpath = new DOMXPath($doc);
+                            foreach (["href", "src"] as $attrname) {
+                                $attrs = $xpath->query('(//@'.$attrname.')', $basenode);
+                                foreach ($attrs as $attr) {
+                                    if (strpos($attr->nodeValue, ":") !== false || $attr->nodeValue[0] == "#" || strpos($attr->nodeValue, "//") == 0) continue;
+                                    if ($attr->nodeValue[0] == "/") $attr->nodeValue = $hostrelurl . $attr->nodeValue;
+                                    else $attr->nodeValue = $filerelurl . $attr->nodeValue;
+                                }
+                            }
+
                             $article['content'] = $doc->saveXML($basenode);
                             $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
                         }
