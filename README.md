@@ -1,3 +1,6 @@
+# For more Features see https://github.com/m42e/ttrss_plugin-feediron
+
+
 ttrss_plugin-af_feedmod
 =======================
 
