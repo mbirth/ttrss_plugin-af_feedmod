@@ -3,6 +3,10 @@ ttrss_plugin-af_feedmod
 
 This is a plugin for Tiny Tiny RSS (tt-rss). It allows you to replace an article's contents by the contents of an element on the linked URL's page, i.e. create a "full feed".
 
+:bangbang: **Since I don't use Tiny Tiny RSS anymore, this project is abandoned for now.** :bangbang:
+
+Please have a look at the [FeedIron](https://github.com/m42e/ttrss_plugin-feediron) plugin by @m42e.
+
 
 Installation
 ------------
