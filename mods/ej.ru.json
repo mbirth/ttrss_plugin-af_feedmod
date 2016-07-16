@@ -1,0 +1,10 @@
+{
+    "name": "ej.ru",
+    "author": "boxdot",
+    "feed": "http://www.ej.ru/xml",
+    "match": "ej.ru",
+    "config": {
+        "type": "xpath",
+        "xpath": "div[@class='text' or @class='txt_e']"
+    }
+}

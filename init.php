@@ -1,216 +1,170 @@
 <?php
 
+require_once('fetch.php');
+
 class Af_Feedmod extends Plugin implements IHandler
 {
-    private $host;
+	private $host;
 
-    function about()
-    {
-        return array(
-            1.0,   // version
-            'Replace feed contents by contents from the linked page',   // description
-            'mbirth',   // author
-            false,   // is_system
-        );
-    }
+	private $mods;
+	private $mods_loaded = false;
 
-    function api_version()
-    {
-        return 2;
-    }
+	function about()
+	{
+		return array(
+			1.0,   // version
+			'Replace feed contents by contents from the linked page',   // description
+			'mbirth',   // author
+			false,   // is_system
+			);
+	}
 
-    function init($host)
-    {
-        $this->host = $host;
+	function api_version()
+	{
+		return 2;
+	}
 
-        $host->add_hook($host::HOOK_PREFS_TABS, $this);
-# only allowed for system plugins:        $host->add_handler('pref-feedmod', '*', $this);
-        $host->add_hook($host::HOOK_ARTICLE_FILTER, $this);
-    }
+	function init($host)
+	{
+		$this->host = $host;
 
-    function csrf_ignore($method)
-    {
-        $csrf_ignored = array("index", "edit");
-        return array_search($method, $csrf_ignored) !== false;
-    }
+		$host->add_hook($host::HOOK_PREFS_TABS, $this);
+		# only allowed for system plugins:        $host->add_handler('pref-feedmod', '*', $this);
+		$host->add_hook($host::HOOK_ARTICLE_FILTER, $this);
+	}
 
-    function before($method)
-    {
-        if ($_SESSION["uid"]) {
-            return true;
-        }
-        return false;
-    }
+	function csrf_ignore($method)
+	{
+		$csrf_ignored = array("index", "edit");
+		return array_search($method, $csrf_ignored) !== false;
+	}
 
-    function after()
-    {
-        return true;
-    }
+	function before($method)
+	{
+		if ($_SESSION["uid"]) {
+			return true;
+		}
+		return false;
+	}
 
-    function hook_article_filter($article)
-    {
-        global $fetch_last_content_type;
+	function after()
+	{
+		return true;
+	}
 
-        $json_conf = $this->host->get($this, 'json_conf');
-        $owner_uid = $article['owner_uid'];
-        $data = json_decode($json_conf, true);
+	function hook_article_filter($article)
+	{
+		global $fetch_last_content_type;
 
-        if (!is_array($data)) {
-            // no valid JSON or no configuration at all
-            return $article;
-        }
+		$owner_uid = $article['owner_uid'];
 
-        foreach ($data as $urlpart=>$config) {
-            if (strpos($article['link'], $urlpart) === false) continue;   // skip this config if URL not matching
-            if (strpos($article['plugin_data'], "feedmod,$owner_uid:") !== false) {
-                // do not process an article more than once
-                if (isset($article['stored']['content'])) $article['content'] = $article['stored']['content'];
-                break;
-            }
+		//
+		// Load mods if they are not already loaded
+		//
+		if (!$this->mods_loaded) {
+			//
+			// Reading mod files
+			//
 
-            switch ($config['type']) {
-                case 'xpath':
-                    $doc = new DOMDocument();
-                    $link = trim($article['link']);
+			$this->mods = array();
+			// bad (!) hardcoded path
+			$mod_files = glob('plugins/af_feedmod/mods/*.json');
+			foreach ($mod_files as $file) {
+			    $json = file_get_contents($file);
+			    $mod = json_decode($json, true);
+			    if (json_last_error() != JSON_ERROR_NONE)
+			    	continue;
+			    
+			    if (!isset($mod['match']) || !isset($mod['config']))
+			    	continue;
 
-                    if (version_compare(VERSION, '1.7.9', '>=')) {
-                        $html = fetch_file_contents($link);
-                        $content_type = $fetch_last_content_type;
-                    } else {
-                        // fallback to file_get_contents()
-                        $html = file_get_contents($link);
+			    $this->mods[$mod['match']] = $mod['config'];
+			}
 
-                        // try to fetch charset from HTTP headers
-                        $headers = $http_response_header;
-                        $content_type = false;
-                        foreach ($headers as $h) {
-                            if (substr(strtolower($h), 0, 13) == 'content-type:') {
-                                $content_type = substr($h, 14);
-                                // don't break here to find LATEST (if redirected) entry
-                            }
-                        }
-                    }
-                    
-                    $charset = false;
-                    if (!isset($config['force_charset'])) {
-                        if ($content_type) {
-                            preg_match('/charset=(\S+)/', $content_type, $matches);
-                            if (isset($matches[1]) && !empty($matches[1])) $charset = $matches[1];
-                        }
-                    } else {
-                        // use forced charset
-                        $charset = $config['force_charset'];
-                    }
-    
-                    if ($charset && isset($config['force_unicode']) && $config['force_unicode']) {
-                        $html = iconv($charset, 'utf-8', $html);
-                        $charset = 'utf-8';
-                    }
-                    
-                    if ($charset) {
-                            $html = '<?xml encoding="' . $charset . '">' . $html;
-                    }
-                    
-                    
-                        
-                    
+			// 
+			// User mods 
+			//
 
-                    @$doc->loadHTML($html);
+			$json_conf = $this->host->get($this, 'json_conf');
+			$user_mods = json_decode($json_conf, true);
+			if (is_array($user_mods))
+				$this->mods = array_merge($this->mods, $user_mods);
 
-                    if ($doc) {
-                        $basenode = false;
-                        $xpath = new DOMXPath($doc);
-                        $entries = $xpath->query('(//'.$config['xpath'].')');   // find main DIV according to config
+			$this->mods_loaded = true;
+		}
 
-                        if ($entries->length > 0) $basenode = $entries->item(0);
+		// article is already fetched
+		if (strpos($article['plugin_data'], "feedmod,$owner_uid:") !== false && isset($article['stored']['content'])) 
+		{
+			$article['content'] = $article['stored']['content'];
+			return $article;
+		}
 
-                        if ($basenode) {
-                            // remove nodes from cleanup configuration
-                            if (isset($config['cleanup'])) {
-                                if (!is_array($config['cleanup'])) {
-                                    $config['cleanup'] = array($config['cleanup']);
-                                }
-                                foreach ($config['cleanup'] as $cleanup) {
-                                    $nodelist = $xpath->query('//'.$cleanup, $basenode);
-                                    foreach ($nodelist as $node) {
-                                        if ($node instanceof DOMAttr) {
-                                            $node->ownerElement->removeAttributeNode($node);
-                                        }
-                                        else {
-                                            $node->parentNode->removeChild($node);
-                                        }
-                                    }
-                                }
-                            }
-                            $article['content'] = $doc->saveXML($basenode);
-                            $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
-                        }
-                    }
-                    break;
+		foreach ($this->mods as $urlpart=>$config) {
+			if (strpos($article['link'], $urlpart) === false) continue;
 
-                default:
-                    // unknown type or invalid config
-                    continue;
-            }
+			$content = fetch_article($article, $config);
+			if (!$content)
+				break;
 
-            break;   // if we got here, we found the correct entry in $data, do not process more
-        }
+			$article['content'] = $content;
+			$article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
+		}
 
-        return $article;
-    }
+		return $article;
+	}
 
-    function hook_prefs_tabs($args)
-    {
-        print '<div id="feedmodConfigTab" dojoType="dijit.layout.ContentPane"
-            href="backend.php?op=af_feedmod"
-            title="' . __('FeedMod') . '"></div>';
-    }
+	function hook_prefs_tabs($args)
+	{
+		print '<div id="feedmodConfigTab" dojoType="dijit.layout.ContentPane"
+		href="backend.php?op=af_feedmod"
+		title="' . __('FeedMod') . '"></div>';
+	}
 
-    function index()
-    {
-        $pluginhost = PluginHost::getInstance();
-        $json_conf = $pluginhost->get($this, 'json_conf');
+	function index()
+	{
+		$pluginhost = PluginHost::getInstance();
+		$json_conf = $pluginhost->get($this, 'json_conf');
 
-        print "<form dojoType=\"dijit.form.Form\">";
+		print "<form dojoType=\"dijit.form.Form\">";
 
-        print "<script type=\"dojo/method\" event=\"onSubmit\" args=\"evt\">
-            evt.preventDefault();
-            if (this.validate()) {
-                new Ajax.Request('backend.php', {
-                    parameters: dojo.objectToQuery(this.getValues()),
-                    onComplete: function(transport) {
-                        if (transport.responseText.indexOf('error')>=0) notify_error(transport.responseText);
-                            else notify_info(transport.responseText);
-                    }
-                });
-                //this.reset();
-            }
-            </script>";
+		print "<script type=\"dojo/method\" event=\"onSubmit\" args=\"evt\">
+		evt.preventDefault();
+		if (this.validate()) {
+			new Ajax.Request('backend.php', {
+				parameters: dojo.objectToQuery(this.getValues()),
+				onComplete: function(transport) {
+					if (transport.responseText.indexOf('error')>=0) notify_error(transport.responseText);
+					else notify_info(transport.responseText);
+				}
+			});
+			//this.reset();
+			}
+			</script>";
 
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"pluginhandler\">";
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"save\">";
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"plugin\" value=\"af_feedmod\">";
+		print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"pluginhandler\">";
+		print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"save\">";
+		print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"plugin\" value=\"af_feedmod\">";
 
-        print "<table width='100%'><tr><td>";
-        print "<textarea dojoType=\"dijit.form.SimpleTextarea\" name=\"json_conf\" style=\"font-size: 12px; width: 99%; height: 500px;\">$json_conf</textarea>";
-        print "</td></tr></table>";
+		print "<table width='100%'><tr><td>";
+		print "<textarea dojoType=\"dijit.form.SimpleTextarea\" name=\"json_conf\" style=\"font-size: 12px; width: 99%; height: 500px;\">$json_conf</textarea>";
+		print "</td></tr></table>";
 
-        print "<p><button dojoType=\"dijit.form.Button\" type=\"submit\">".__("Save")."</button>";
+		print "<p><button dojoType=\"dijit.form.Button\" type=\"submit\">".__("Save")."</button>";
 
-        print "</form>";
-    }
+		print "</form>";
+	}
 
-    function save()
-    {
-        $json_conf = $_POST['json_conf'];
+	function save()
+	{
+		$json_conf = $_POST['json_conf'];
 
-        if (is_null(json_decode($json_conf))) {
-            echo __("error: Invalid JSON!");
-            return false;
-        }
+		if (is_null(json_decode($json_conf))) {
+			echo __("error: Invalid JSON!");
+			return false;
+		}
 
-        $this->host->set($this, 'json_conf', $json_conf);
-        echo __("Configuration saved.");
-    }
-
+		$this->host->set($this, 'json_conf', $json_conf);
+		echo __("Configuration saved.");
+	}
 }

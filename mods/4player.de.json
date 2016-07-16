@@ -1,0 +1,12 @@
+{
+    "name": "4players.de",
+    "author": "boxdot",
+    "feed": "http://feeds.4players.de/Allgemein/news/-/rss.xml",
+    "match": "4players.de",
+    "config": {
+        "type": "xpath",
+        "xpath": "article",
+        "force_charset": "utf-8",
+        "cleanup": ["header", "footer", "div[contains(@class, 'social-facebook')]"]
+    }
+}

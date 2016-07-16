@@ -1,33 +1,38 @@
 <?php
 
-$config = array(
-    'type' => 'xpath',
-    'xpath' => 'div[@itemprop="articleBody"]',
-);
+require_once(dirname(__FILE__)  . '/../fetch.php');
 
-$article = array(
-    'link' => 'http://www.der-postillon.com/2013/04/nordkoreas-armee-nach-wochenlangem.html',
-    'content' => 'This is the feed content',
-    'plugin_data' => '',
-);
-
-$doc = new DOMDocument();
-$html = file_get_contents($article['link']);
-$doc->loadHTML($html);
-
-if ($doc) {
-    $basenode = false;
-    $xpath = new DOMXPath($doc);
-    $entries = $xpath->query('(//'.$config['xpath'].')');   // find main DIV according to config
-
-    var_dump($entries);
-
-    if ($entries->length > 0) $basenode = $entries->item(0);
-
-    if ($basenode) {
-       $article['content'] = $doc->saveXML($basenode);
-       $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
-    }
+if (count($argv) <= 2) {
+    echo 'USAGE: php fetch.php [mod_file] [article_url]' . PHP_EOL;
+    exit(1);
 }
 
-print_r($article);
+$mod = $argv[1];
+$article_url = $argv[2];
+
+//
+// Getting json config
+//
+
+$json = file_get_contents($mod);
+$data = json_decode($json, true);
+
+echo "<pre>";
+print_r($data);
+echo "</pre>";
+
+if (json_last_error() != JSON_ERROR_NONE) {
+    echo 'Json error' . PHP_EOL;
+    exit(1);
+}
+
+$config = $data['config'];
+
+//
+// Fetching article
+//
+
+$owner_uid = 100;
+$article = array( 'link' => $article_url );
+
+echo fetch_article($article, $config);
