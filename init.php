@@ -142,7 +142,13 @@ class Af_Feedmod extends Plugin implements IHandler
                                     }
                                 }
                             }
-                            $article['content'] = $doc->saveXML($basenode);
+                            
+                            // modify the article
+                            if ($config['mod_link']) {
+                                $article['link'] = $basenode->textContent;
+                            } else {
+                                $article['content'] = $doc->saveXML($basenode);
+                            }
                             $article['plugin_data'] = "feedmod,$owner_uid:" . $article['plugin_data'];
                         }
                     }
